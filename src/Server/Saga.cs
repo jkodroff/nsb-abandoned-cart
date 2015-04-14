@@ -23,7 +23,7 @@ namespace Server
                 new AbandonedCartTimeout {
                     ItemCount = Data.ItemCount
                 }
-                );
+            );
         }
 
         public void Handle(OrderSubmitted message)
@@ -75,7 +75,13 @@ namespace Server
         public string OriginalMessageId { get; set; }
 
         // Our properties, specific to this saga:
+        
+        // This needs to be unique so that we can scale out, or 
+        // we might get 2 Sagas with the same username, 
+        // per https://twitter.com/UdiDahan/status/587896128688951297
+        [Unique]
         public string UserName { get; set; }
+        
         public int ItemCount { get; set; }
     }
 }
