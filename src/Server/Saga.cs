@@ -16,12 +16,12 @@ namespace Server
             Console.WriteLine("Received ItemAddedToCart for " + message.UserName);
 
             Data.UserName = message.UserName;
-            Data.ItemCount += 1;
+            Data.LastTimeoutId = Guid.NewGuid();
 
             RequestTimeout(
                 TimeSpan.FromSeconds(5),
                 new AbandonedCartTimeout {
-                    ItemCount = Data.ItemCount
+                    Id = Data.LastTimeoutId
                 }
             );
         }
@@ -36,7 +36,7 @@ namespace Server
 
         public void Timeout(AbandonedCartTimeout state)
         {
-            if (Data.ItemCount != state.ItemCount) {
+            if (Data.LastTimeoutId != state.Id) {
                 // This is not the last timeout issued, so ignore it.
                 return;
             }
@@ -64,7 +64,7 @@ namespace Server
 
     public class AbandonedCartTimeout
     {
-        public int ItemCount { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class AbandonedCartSagaData : IContainSagaData
@@ -82,6 +82,6 @@ namespace Server
         [Unique]
         public string UserName { get; set; }
         
-        public int ItemCount { get; set; }
+        public Guid LastTimeoutId{ get; set; }
     }
 }
